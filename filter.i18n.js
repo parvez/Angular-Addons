@@ -3,18 +3,25 @@
  * It depends on 
  *
  * You need a javascript opject with your translations like this:
+ * (Supports JSON reference like "Section1.Name" instead of one long list)
  * lang = {
- *   'Name': 'Name'
- *   ,'City': 'Ort'
- *   ,'Population': 'Einwohner'
+ *   'Section1': {
+ *      'Name':'Name'
+ *   },
+ *   'Section2': {
+ *      'City': 'Ort'
+ *   },
+ *   Section3: {
+ *      'Population': 'Einwohner'
+ *   }
  * }
- * You could include it as a file dependig on e.g. url (http://domain.tld/de/) or session
+ * You could include it as a file depending on e.g. url (http://domain.tld/de/) or session
  *
  * Usage in template:
- * {{'My Text'|i18n}}
+ * {{'Section1.Name'|i18n}}
  *
  * Usage in controller/directrive/widget:
- * angular.filter.i18n('My Text');
+ * angular.filter.i18n('Section1.Name');
  *
  */
 angular.filter('i18n', function(string) { 
@@ -33,7 +40,20 @@ angular.filter('i18n', function(string) {
         }
     }
 
-    var translated = lang[string]; // lang ist from the language file, e.g. de_DE.js
+    function __getObjectValue(name, obj) {
+      name+='';    
+      var val, arr;
+      if ( ! name || ! obj) return null;
+      arr = name.split('.');
+      for (var i = 0; i < arr.length; i++) {
+        obj = obj[arr[i]];
+        if (obj == null || obj == undefined) break;
+      }
+      return obj;
+    }
+
+    var translated = ( __getObjectValue(string, lang) );
+    // var translated = lang[string]; // lang ist from the language file, e.g. de_DE.js
     if (translated === undefined) {
         if (log_untranslated == true) {
             // here we could track unreanslated strings by sending them to the server...
